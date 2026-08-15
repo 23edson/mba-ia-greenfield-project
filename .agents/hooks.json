@@ -1,0 +1,9 @@
+{
+  "hooks": [
+    {
+      "name": "activate-relevant-skills",
+      "event": "UserPromptSubmit",
+      "command": "echo 'Identify and activate relevant skills for this task.'"
+    }
+  ]
+}
