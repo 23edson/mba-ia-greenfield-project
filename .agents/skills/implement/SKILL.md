@@ -1,7 +1,6 @@
 ---
 name: implement
 description: "Execute a phase or task implementation plan step by step, respecting dependencies, running the relevant tests after each SI, and only advancing when tests pass. Use whenever the user asks to implement, execute, build, or deliver a planned phase or task — including variations like 'implement phase X', 'execute phase-02', 'build the auth phase', 'implement task <slug>', 'run the task plan', 'implement the SIs', or any request to turn a plan document (docs/phases/phase-NN-{slug}/phase-NN-{slug}.md or docs/tasks/task-{slug}/task-{slug}.md) into working code."
-disable-model-invocation: true
 ---
 
 # Implement
@@ -395,7 +394,7 @@ Work through the technical actions in order. Stay within scope — only touch fi
 
 When the SI introduces new dependencies, install them with the exact version ranges listed in the SI's technical actions.
 
-Follow the target subproject's conventions. When you need to discover naming/style/structure patterns of the subproject (e.g., "how are services organized", "what's the module structure convention"), delegate the exploration to a subagent via the `Agent` tool with `subagent_type: Explore`. The subagent reads the neighbor files in its own context and returns a concise summary, keeping the full file contents out of your main session. Only read a specific neighbor file directly when you need to modify it or mirror it closely — not when you're just learning conventions. The "mirror closely" case still follows the **Targeted Reads** preference below: read only the sections you are actually mirroring, not the whole file.
+Follow the target subproject's conventions. When you need to discover naming/style/structure patterns of the subproject (e.g., "how are services organized", "what's the module structure convention"), delegate the exploration to a subagent. Define a subagent named `Explore` via the `define_subagent` tool with instructions to act as a code explorer, and invoke it via `invoke_subagent` (TypeName: `Explore`). The subagent reads the neighbor files in its own context and returns a concise summary, keeping the full file contents out of your main session. Only read a specific neighbor file directly when you need to modify it or mirror it closely — not when you're just learning conventions. The "mirror closely" case still follows the **Targeted Reads** preference below: read only the sections you are actually mirroring, not the whole file.
 
 Scope note: `Explore` is for **project-specific** conventions (file naming, folder layout, local helpers, repository idioms) that the loaded best-practices skills (e.g., `nestjs-best-practices`, `typeorm`) do **not** cover. If the convention you need is already documented by a loaded skill, use that — don't spawn Explore redundantly.
 
@@ -465,7 +464,7 @@ After completing 3a, proceed with the inline Tests-section files (Unit / Integra
 
 ### 4. Run the tests for this SI
 
-Delegate test execution to a subagent via the `Agent` tool with `subagent_type: general-purpose`. The subagent absorbs the raw output in its own context and returns you a **diagnosis-preserving, noise-stripped** report, keeping verbose test output out of your main session.
+Delegate test execution to a subagent. Use the `invoke_subagent` tool with `TypeName: 'self'` to run the tests in a separate, isolated background conversation context. The subagent will execute the tests, absorb the raw output in its own context, and return to you a **diagnosis-preserving, noise-stripped** report, keeping verbose test output completely out of your main session.
 
 Instruct the subagent to:
 - **First, read `{target-subproject}/CLAUDE.md`** to learn the subproject's command conventions (containerization, env vars, wrappers, etc.). Subagents receive **only** their invocation prompt plus basic environment details (cwd) — they do **not** inherit Claude Code's system prompt, so neither the root `CLAUDE.md` nor the subproject `CLAUDE.md` is visible to them until explicitly read. Without this Read, the subagent will guess a plausible-looking invocation that may run in the wrong environment (e.g., on the host instead of in the container).

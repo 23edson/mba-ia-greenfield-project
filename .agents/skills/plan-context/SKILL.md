@@ -1,7 +1,6 @@
 ---
 name: plan-context
 description: "Stage 1 of the plan pipeline (phase and task modes). Consolidates project-plan.md (phase mode), decisions docs (phase-scope + ad-hoc tied to the phase, or the task's own + correlated docs), prior phases (or latest completed phase) and testing guide into a lean context.md. Use when the user asks to start planning a phase or task, generate the context, or run the first stage of the planning pipeline. Triggers: 'plan-context NN', 'plan-context <slug>', 'plan-context \"prose\"', 'gera o contexto da fase NN', 'inicia planejamento da task <slug>'."
-disable-model-invocation: true
 ---
 
 # Plan Pipeline — Stage 1: Context
@@ -133,24 +132,26 @@ Order is (1) → (2) → (3); first available wins. Rationale: partial context.m
 
 ### Step 1 — Dispatch subagents in parallel
 
-Issue all applicable subagent calls in a **single assistant message** with concurrent `Agent` tool uses.
+First, ensure that all required subagents are defined in this conversation by calling `define_subagent` for each of them (only if they are not already defined), using the corresponding system prompt file located under `.agents/skills/agents/<name>.md`. 
+
+Then, issue all applicable subagent calls in a **single assistant message** with concurrent `invoke_subagent` tool calls.
 
 **Phase mode — dispatch 5–6 subagents in parallel:**
 
-- `subagent_type: plan-reader` (input: `NN`) — extracts phase scope + neighbors from `project-plan.md`.
-- `subagent_type: decisions-reader` (input: `mode=phase`, `identifier={slug}`) — builds the TD index. Pass the slice slug resolved at Preflight (not the raw `NN`); the agent derives `NN` internally from the slice's `related_phases[0]`. The keep filter returns the phase-scope doc matching the slug plus all ad-hoc docs with `NN ∈ related_phases`.
-- `subagent_type: decisions-detail-reader` (input: `mode=phase`, `identifier={slug}`) — extracts `**Recommendation:**` prose + `**Libraries:**` per decided TD of the current slice. Pass the slice slug (not `NN`); same rationale as decisions-reader above.
-- `subagent_type: decisions-correlator` (input: `mode=phase`, `identifier={slug}`, `scope_prose`) — returns ranked shortlist of ad-hoc `related_phases: []` docs semantically relevant to this slice. Pass the slice slug (agent derives `NN` via `related_phases[0]`).
-- `subagent_type: phases-reader` (input: `mode=phase`, `NN`, `slug`, `depends_on_slices=[...]`) — extracts Conventions to Match AND Inherited TD Details AND Inherited Deferred Capabilities (from prior phases). When `depends_on_slices` is non-empty, phases-reader additionally resolves sibling slice `context.md` + `library-refs.md` as inheritance sources (tagged `_(from slice {sibling-slug})_`), applying the maturity gate from `plan-pipeline/SKILL.md` (sibling skipped if any of its TDs is `pending` AND its plan-build artifact is absent).
-- `subagent_type: inventory-digest-reader` (input: `mode=phase`, `NN`, `slug`) — **dispatched only when Step 0.5 determined UI scope present AND inventory file exists**. The agent uses slug-exact lookup at `docs/inventories/screen-inventory-phase-NN-{slug}.md` (no wildcard), so the slice `slug` is required alongside `NN`. Emits `## UI Inventory for Phase NN`.
+- `plan-reader` — define using `.agents/skills/agents/plan-reader.md` and invoke with `invoke_subagent` (TypeName: `plan-reader`, Prompt: `NN`). Extracts phase scope + neighbors from `project-plan.md`.
+- `decisions-reader` — define using `.agents/skills/agents/decisions-reader.md` and invoke with `invoke_subagent` (TypeName: `decisions-reader`, Prompt: `mode=phase, identifier={slug}`). Builds the TD index. Pass the slice slug resolved at Preflight (not the raw `NN`); the agent derives `NN` internally from the slice's `related_phases[0]`. The keep filter returns the phase-scope doc matching the slug plus all ad-hoc docs with `NN ∈ related_phases`.
+- `decisions-detail-reader` — define using `.agents/skills/agents/decisions-detail-reader.md` and invoke with `invoke_subagent` (TypeName: `decisions-detail-reader`, Prompt: `mode=phase, identifier={slug}`). Extracts `**Recommendation:**` prose + `**Libraries:**` per decided TD of the current slice. Pass the slice slug (not `NN`); same rationale as decisions-reader above.
+- `decisions-correlator` — define using `.agents/skills/agents/decisions-correlator.md` and invoke with `invoke_subagent` (TypeName: `decisions-correlator`, Prompt: `mode=phase, identifier={slug}, scope_prose`). Returns ranked shortlist of ad-hoc `related_phases: []` docs semantically relevant to this slice. Pass the slice slug (agent derives `NN` via `related_phases[0]`).
+- `phases-reader` — define using `.agents/skills/agents/phases-reader.md` and invoke with `invoke_subagent` (TypeName: `phases-reader`, Prompt: `mode=phase, NN, slug, depends_on_slices=[...]`). Extracts Conventions to Match AND Inherited TD Details AND Inherited Deferred Capabilities (from prior phases). When `depends_on_slices` is non-empty, phases-reader additionally resolves sibling slice `context.md` + `library-refs.md` as inheritance sources (tagged `_(from slice {sibling-slug})_`), applying the maturity gate from `plan-pipeline/SKILL.md`.
+- `inventory-digest-reader` — **dispatched only when Step 0.5 determined UI scope present AND inventory file exists**. Define using `.agents/skills/agents/inventory-digest-reader.md` and invoke with `invoke_subagent` (TypeName: `inventory-digest-reader`, Prompt: `mode=phase, NN, slug`). The agent uses slug-exact lookup at `docs/inventories/screen-inventory-phase-NN-{slug}.md` (no wildcard), so the slice `slug` is required alongside `NN`. Emits `## UI Inventory for Phase NN`.
 
 **Task mode — dispatch up to 5 subagents in parallel:**
 
-- `subagent_type: decisions-reader` (input: `mode=task`, `{slug}`) — only if `docs/decisions/technical-decisions-{slug}.md` exists; otherwise skip (the placeholder output is synthesized locally as `_No TDs._` in `## Decisions Index`).
-- `subagent_type: decisions-detail-reader` (input: `mode=task`, `{slug}`) — only if the task's decisions doc exists; otherwise skip.
-- `subagent_type: decisions-correlator` (input: `mode=task`, `{slug}`, `scope_prose`) — returns ranked shortlist across all decisions docs except the task's own.
-- `subagent_type: phases-reader` (input: `mode=task`) — returns inheritance from the latest completed phase (or placeholder if none).
-- `subagent_type: inventory-digest-reader` (input: `mode=task`, `{slug}`) — **dispatched only when Step 0.5 determined UI scope present AND `docs/tasks/task-{slug}/inventory.md` exists**. Emits `## UI Inventory for Task {slug}`.
+- `decisions-reader` — only if `docs/decisions/technical-decisions-{slug}.md` exists; otherwise skip. Define using `.agents/skills/agents/decisions-reader.md` and invoke with `invoke_subagent` (TypeName: `decisions-reader`, Prompt: `mode=task, {slug}`).
+- `decisions-detail-reader` — only if the task's decisions doc exists; otherwise skip. Define using `.agents/skills/agents/decisions-detail-reader.md` and invoke with `invoke_subagent` (TypeName: `decisions-detail-reader`, Prompt: `mode=task, {slug}`).
+- `decisions-correlator` — define using `.agents/skills/agents/decisions-correlator.md` and invoke with `invoke_subagent` (TypeName: `decisions-correlator`, Prompt: `mode=task, {slug}, scope_prose`). Returns ranked shortlist across all decisions docs except the task's own.
+- `phases-reader` — define using `.agents/skills/agents/phases-reader.md` and invoke with `invoke_subagent` (TypeName: `phases-reader`, Prompt: `mode=task`). Returns inheritance from the latest completed phase (or placeholder if none).
+- `inventory-digest-reader` — **dispatched only when Step 0.5 determined UI scope present AND `docs/tasks/task-{slug}/inventory.md` exists**. Define using `.agents/skills/agents/inventory-digest-reader.md` and invoke with `invoke_subagent` (TypeName: `inventory-digest-reader`, Prompt: `mode=task, {slug}`). Emits `## UI Inventory for Task {slug}`.
 
 `plan-reader` is **not** dispatched in task mode — project-plan.md is phase-exclusive.
 

@@ -1,7 +1,6 @@
 ---
 name: plan-pipeline
 description: "Entry point and shared conventions for the plan pipeline (phase and task modes). Invoke directly when the user asks about planning without specifying a stage — this skill orients them to the pipeline stages (context → validate → resolve → build → specs [optional]). For actual work, use the stage skills: plan-context, plan-validate, plan-resolve, plan-build, plan-test-specs."
-disable-model-invocation: true
 ---
 
 # Plan Pipeline Overview
@@ -213,9 +212,9 @@ Heavy reads (project-plan, globbing all decisions docs, scanning prior phases) a
   - Dispatched **conditionally** — only when the inventory file exists. Absence is handled by the caller via fallback placeholder (not an error).
   - Task mode additionally consumes inventories from ALL UI-bearing slices of the latest completed phase (aggregated + deduped by component name) and emits `### Inherited UI Components` for cross-phase DS reuse.
 
-Dispatch them **in parallel** via the `Agent` tool with `subagent_type: <name>`. Each subagent returns a compact structured response (table or YAML-like) — the main thread consolidates without loading the raw source files.
+Define them via `define_subagent` (if not already defined in the conversation) with their system prompt loaded from `.agents/skills/agents/<name>.md`. Then, dispatch them **in parallel** via the `invoke_subagent` tool with the corresponding `TypeName: <name>`. Each subagent returns a compact structured response — the main thread consolidates without loading the raw source files.
 
-**Subagent default mode=phase (Decisão #25).** `phases-reader`, `decisions-reader`, `decisions-detail-reader`, `inventory-digest-reader` treat the absence of `mode` as `mode=phase`. Callers that never pass `mode` (legacy pre-rename dispatches, or any caller exercising phase behavior) continue to work unchanged. Task mode requires the caller to pass `mode=task` explicitly.
+**Subagent default mode=phase (Decisão #25).** `phases-reader`, `decisions-reader`, `decisions-detail-reader`, `inventory-digest-reader` treat the absence of `mode` as `mode=phase`. Callers that never pass `mode` (legacy dispatches, or any caller exercising phase behavior) continue to work unchanged. Task mode requires passing `mode=task` explicitly.
 
 **When to use subagents vs direct reads:**
 

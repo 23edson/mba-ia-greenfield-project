@@ -4,7 +4,6 @@ description: >
   Analyzes a project's tech stack, searches the web for testing best practices,
   asks the user clarifying questions, and generates a project-specific testing
   multi-file skill at `.claude/skills/testing-guide-<project>/` with main SKILL.md and artifact/reference sub-files. Invoke with `/generate-test-guide <project-folder>`.
-disable-model-invocation: true
 ---
 
 # Generate Test Guide

@@ -1,7 +1,6 @@
 ---
 name: plan-phase
 description: "Generate a technical implementation plan for a project phase. Use whenever the user asks to plan, detail, or generate the technical plan for a phase — including variations like 'plan phase X', 'detail the phase', 'generate phase implementation', 'create the phase-XX.md', or any mention of creating the technical document for a project phase."
-disable-model-invocation: true
 ---
 
 # Plan Phase

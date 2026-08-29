@@ -1,7 +1,6 @@
 ---
 name: screen-inventory
 description: "Generate a screen inventory for a project phase or task. Infers which screens need to be built or updated from the phase's capabilities (phase mode) or from the task's scope prose (task mode), asks the user for the corresponding Figma URLs, then extracts each screen's components via the Figma MCP, classifies them by behavior (Presentational / Local-interactive / Server-connected), and maps server-connected components to capabilities or scope. Use whenever the user asks to inventory screens, extract components from Figma for planning, or prepare the front-end inputs before /plan-context — including variations like 'inventariar as telas', 'inventário de telas da fase NN', 'screen inventory NN', 'screen inventory <task-slug>', 'extrair componentes do Figma', or any mention of connecting Figma screens to planning before plan-context runs. Accepts a phase number (integer) OR a task slug (string), optionally with an upfront list of Figma URLs."
-disable-model-invocation: true
 ---
 
 # Screen Inventory
@@ -253,7 +252,7 @@ Only after both files exist do you move on to "How to extract structure from Fig
 
 ## How to extract structure from Figma
 
-Figma extraction is **always delegated to sub-agents via the `Agent` tool**, one per screen that still needs extraction (all screens on a fresh run; just the `pending`/`in_progress` rows on resume). For multi-screen phases, spawn them in parallel in a single turn (multiple `Agent` tool calls in one message). Each sub-agent has its own context window, so the raw output of `get_design_context` + `get_screenshot` never enters the parent's context — the parent only sees the sub-agent's structured return, a markdown block ready to paste into the inventory file.
+Figma extraction is **always delegated to sub-agents via the `invoke_subagent` tool**, one per screen that still needs extraction (all screens on a fresh run; just the `pending`/`in_progress` rows on resume). Define a subagent named `figma-extractor` via the `define_subagent` tool (instructing it to call Figma MCP, classify components, and return structured markdown), and invoke it using `invoke_subagent` (TypeName: `figma-extractor`). For multi-screen phases, spawn them in parallel in a single turn (multiple subagent runs in one message). Each sub-agent has its own context window, so the raw output of `get_design_context` + `get_screenshot` never enters the parent's context — the parent only sees the sub-agent's structured return, a markdown block ready to paste into the inventory file.
 
 ### Sub-agent contract
 
@@ -263,7 +262,7 @@ The parent is the only entity that talks to the user, reads files, writes files,
 
 1. **The Figma target:** `fileKey`, `nodeId` (in MCP form), and the full URL.
 2. **The phase capabilities, quoted verbatim** from the relevant `### Fase NN — …` section of `docs/project-plan.md`. Sub-agents do NOT read project-plan.md themselves — the parent reads it once (during Figma inputs Step 1 on a fresh run, or during preflight on a resume) and passes the relevant slice to every sub-agent it dispatches.
-3. **A pointer to the classification rules:** the sub-agent is instructed to read the sections "How to classify components", "How to derive verbs of intent", and "Output structure" from `.claude/skills/screen-inventory/SKILL.md`. These rules are too long to restate in every prompt and change rarely, so pointing to them keeps the prompt short; only the short extraction-time rules are still restated inline in the template below.
+3. **A pointer to the classification rules:** the sub-agent is instructed to read the sections "How to classify components", "How to derive verbs of intent", and "Output structure" from `.agents/skills/screen-inventory/SKILL.md`. These rules are too long to restate in every prompt and change rarely, so pointing to them keeps the prompt short; only the short extraction-time rules are still restated inline in the template below.
 4. **Already-classified components the sub-agent should reuse**, aggregated by the parent from two sources: (a) screens already appended to the current inventory file — only populated when a new parent resumes a partially-completed run from an existing progress file; (b) components found unchanged in prior-phase inventories under `docs/inventories/` — populated when the parent identified cross-phase reuse candidates while reading that directory in the Context step. Format: `ComponentName → Type, In DS?: ✓/✗[, reuse path][, source: current | phase-NN]`. When building this list, read the corresponding row in the Component inventory table of the existing inventory and extract: Type, In DS?, Reuse?, and any "see screen:" Notes. Do not omit `In DS?` — it is the most critical field for cross-screen consistency. If In DS? is `✗`, keep it `✗` even if Reuse? has a path value (the path is planned, not yet implemented) — **except** when the Cross-phase promotion rule fires (see Context step 4: a form-2 inherited entry whose path is now present in the step-6 filesystem snapshot is overridden to `In DS?: ✓` with the `(new)` suffix stripped).
 5. **The return contract** (see below).
 

@@ -1,7 +1,6 @@
 ---
 name: figma-apply-tokens-tailwind-v4
 description: Apply a Figma → CSS audit report to a Tailwind v4 project. Reads `docs/figma-audit.json` produced by `figma-audit-tokens`, validates the CSS file hasn't changed since audit, applies drift fixes and inserts missing tokens following Tailwind v4 conventions (`@theme inline` for primitives, theme selector blocks for multi-mode tokens), and runs scale-gap analysis. Invoke ONLY when the user explicitly asks to apply, sync, or commit the audit — phrases like "apply figma audit", "sync figma tokens to CSS", "aplica os tokens do figma", "atualiza o CSS com o audit". Requires `docs/figma-audit.json`; if missing, instruct the user to run `figma-audit-tokens` first.
-disable-model-invocation: true
 ---
 
 # Apply Figma Tokens (Tailwind v4)

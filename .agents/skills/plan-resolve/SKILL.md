@@ -1,7 +1,6 @@
 ---
 name: plan-resolve
 description: "Stage 3 of the plan pipeline (phase and task modes). Reads validation.md, asks the user via AskUserQuestion, and applies the answers to the decisions doc (filling **Decision:** fields, injecting superseded markers, or creating the decisions doc on-the-fly in task-sem-research), context.md (patching the Decisions Index), and validation.md (marking issues resolved). Dispatches Context7 for newly decided libraries and writes library-refs.md. In phase mode, aborts on MD-N with a /research instruction. In task mode, MD-N may be resolved inline by creating the decisions doc. Use after /plan-validate <arg> reports status: dirty. Triggers: 'plan-resolve NN', 'plan-resolve <slug>', 'resolve issues da fase NN', 'apply decisions to task <slug>'."
-disable-model-invocation: true
 ---
 
 # Plan Pipeline — Stage 3: Resolve
@@ -239,7 +238,7 @@ After all rules processed, proceed to Step 5 (Context7 fetch + library-refs sync
 
 ### Step 5 — Context7 fetch and library-refs sync
 
-**Dispatch `decisions-reader` + `decisions-detail-reader` post-edit.** After step 4's edits have been applied, issue **two parallel `Agent` calls** in a single assistant message, both passing the mode and identifier:
+**Dispatch `decisions-reader` + `decisions-detail-reader` post-edit.** After step 4's edits have been applied, define and invoke the `decisions-reader` and `decisions-detail-reader` subagents in parallel (using `define_subagent` if not already defined) and call them concurrently via `invoke_subagent` in a single assistant message, both passing the mode and identifier:
 
 - `decisions-reader` (input: `mode`, `identifier`) — captures the current post-edit inventory of decided TDs, their libraries, and the `related_phases` list of every source doc (feeds the library target set computation below).
 - `decisions-detail-reader` (input: `mode`, `identifier`) — produces a fresh `## Decisions Detail for Phase NN / slice {slug}` (phase mode) / `## Decisions Detail for Task {slug}` (task mode) block reflecting the post-edit state of every current-scope TD (feeds the context.md rewrite sub-procedure below).

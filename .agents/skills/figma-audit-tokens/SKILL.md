@@ -1,7 +1,6 @@
 ---
 name: figma-audit-tokens
 description: Audit drift between a Figma variable collection and a project's CSS variables. Captures Figma variables (all modes) plus text/effect styles, parses the project's CSS variables wherever they live (`@theme inline`, `:root`, `.dark`, custom selectors), and emits a structured JSON report at `docs/figma-audit.json` with drift items, missing-in-CSS items, and raw style observations. Framework-agnostic for variable drift; styles are emitted raw for downstream apply skills to analyze. Invoke ONLY when the user explicitly asks to audit, compare, or check drift between Figma and CSS — phrases like "audit figma tokens", "figma vs CSS drift", "compare figma to CSS variables", "puxa o estado do figma", "compara tokens do figma com o css". Never trigger on ambient Figma mentions or design-to-code work — those belong to figma-implement-design.
-disable-model-invocation: true
 ---
 
 # Audit Figma Tokens → JSON Drift Report

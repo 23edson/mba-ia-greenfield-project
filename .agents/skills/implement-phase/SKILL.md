@@ -1,7 +1,6 @@
 ---
 name: implement-phase
 description: "Execute a phase implementation plan step by step, respecting dependencies, running the relevant tests after each SI, and only advancing when tests pass. Use whenever the user asks to implement, execute, build, or deliver a planned phase — including variations like 'implement phase X', 'execute phase-02', 'build the auth phase', 'run the phase plan', 'implement the SIs', or any request to turn a phase plan document (docs/phases/phase-NN-*.md) into working code."
-disable-model-invocation: true
 ---
 
 # Implement Phase

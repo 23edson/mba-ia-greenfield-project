@@ -1,7 +1,6 @@
 ---
 name: plan-rule-author
 description: "Scaffolds a new custom rule MD file under docs/rules/{plan-validate,plan-build,plan-resolve}/ following the canonical contract documented inline in this SKILL.md. Use when the user asks to create, author, or scaffold a new validation/build/resolve rule, register a new IC prefix, or add a custom check that fires under one of /plan-validate, /plan-build, or /plan-resolve. Trigger phrases: 'crie uma regra de plan-validate/build/resolve', 'nova regra de validação/build/resolve', 'add a custom rule that detects X', 'register a new IC prefix', 'scaffold a rule for {dispatch point}'. Out of scope: editing/disabling existing rules (Read+Edit directly), creating a new dispatch point (rare manual procedure documented in this SKILL.md as a tail section), authoring suppressions.md (owner-managed file)."
-disable-model-invocation: true
 ---
 
 # Plan Rule Author
