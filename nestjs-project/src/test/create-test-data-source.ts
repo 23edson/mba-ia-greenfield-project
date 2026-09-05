@@ -24,8 +24,11 @@ export function createTestDataSource(
 }
 
 export async function cleanAllTables(dataSource: DataSource): Promise<void> {
-  await dataSource.query('DELETE FROM "refresh_tokens"');
-  await dataSource.query('DELETE FROM "verification_tokens"');
-  await dataSource.query('DELETE FROM "channels"');
-  await dataSource.query('DELETE FROM "users"');
+  const tableNames = dataSource.entityMetadatas
+    .map((m) => `"${m.tableName}"`)
+    .join(', ');
+
+  if (tableNames.length > 0) {
+    await dataSource.query(`TRUNCATE TABLE ${tableNames} CASCADE`);
+  }
 }
