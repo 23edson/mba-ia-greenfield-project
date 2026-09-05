@@ -1,7 +1,7 @@
 # phase-03-videos — Progress
 
 **Status:** in_progress
-**SIs:** 3/8 completed
+**SIs:** 4/8 completed
 
 ### SI-03.1 — Dependencies, Configuration Namespaces e MinIO/Redis Infrastructure
 - **Status:** completed
@@ -22,9 +22,9 @@
 - **Observations:** Implemented `StorageService` using AWS SDK v3 for multipart upload lifecycle and presigned URL generation (chunks and download/streaming with response-content-disposition). Refactored shared test helper `cleanAllTables` to dynamically inspect `dataSource.entityMetadatas.map(m => m.tableName)` and issue a single unified `TRUNCATE TABLE ... CASCADE` query, removing hardcoded table references and fixing pre-existing legacy test failures across isolated `synchronize: true` test suites.
 
 ### SI-03.4 — Queue Module e Video Processing Worker Container Setup
-- **Status:** pending
-- **Tests:** pending
-- **Observations:** pending
+- **Status:** completed
+- **Tests:** 2/2 passing (video-processing-queue.module.spec.ts, worker-app.module.spec.ts)
+- **Observations:** Configured BullMQ `VideoProcessingQueueModule` for `video-processing` queue with exponential backoff retry policies. Created `Dockerfile.worker` containing `ffmpeg` and `ffprobe`. Added `video-worker` service in `compose.yaml` mapping the temporary volume `/tmp/video-jobs`. Implemented the standalone `worker.ts` bootstrap entry point.
 
 ### SI-03.5 — Video Processing Processor (FFmpeg Worker Logic)
 - **Status:** pending

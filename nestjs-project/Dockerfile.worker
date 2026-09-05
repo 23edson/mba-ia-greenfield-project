@@ -1,0 +1,19 @@
+FROM node:20-bookworm-slim
+
+# Install ffmpeg and ffprobe
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+
+# Verify ffmpeg and ffprobe binary installation and availability in PATH
+RUN ffmpeg -version && ffprobe -version
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
+# Default command to run worker
+CMD ["node", "dist/worker.js"]

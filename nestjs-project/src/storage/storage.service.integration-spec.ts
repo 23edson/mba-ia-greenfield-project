@@ -2,7 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { StorageService } from './storage.service';
 import { ConfigModule } from '@nestjs/config';
 import storageConfig from '../config/storage.config';
-import { S3Client, CreateBucketCommand, HeadBucketCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  CreateBucketCommand,
+  HeadBucketCommand,
+} from '@aws-sdk/client-s3';
 
 describe('StorageService (Integration)', () => {
   let service: StorageService;
@@ -21,7 +25,7 @@ describe('StorageService (Integration)', () => {
     }).compile();
 
     service = module.get<StorageService>(StorageService);
-    
+
     // Create bucket if not exists
     s3Client = new S3Client({
       endpoint: process.env.STORAGE_ENDPOINT || 'http://localhost:9000',
@@ -34,9 +38,13 @@ describe('StorageService (Integration)', () => {
     });
 
     try {
-      await s3Client.send(new HeadBucketCommand({ Bucket: 'streamtube-videos' }));
+      await s3Client.send(
+        new HeadBucketCommand({ Bucket: 'streamtube-videos' }),
+      );
     } catch (e) {
-      await s3Client.send(new CreateBucketCommand({ Bucket: 'streamtube-videos' }));
+      await s3Client.send(
+        new CreateBucketCommand({ Bucket: 'streamtube-videos' }),
+      );
     }
   });
 
@@ -62,10 +70,14 @@ describe('StorageService (Integration)', () => {
     expect(etag).toBeDefined();
 
     // 4. Complete upload
-    await service.completeMultipartUpload(key, uploadId, [{ PartNumber: 1, ETag: etag as string }]);
+    await service.completeMultipartUpload(key, uploadId, [
+      { PartNumber: 1, ETag: etag as string },
+    ]);
 
     // 5. Get presigned download URL
-    const downloadUrl = await service.getPresignedDownloadUrl(key, { responseContentDisposition: 'attachment; filename="test.txt"' });
+    const downloadUrl = await service.getPresignedDownloadUrl(key, {
+      responseContentDisposition: 'attachment; filename="test.txt"',
+    });
     expect(downloadUrl).toContain('X-Amz-Signature');
     expect(downloadUrl).toContain('response-content-disposition=attachment');
 

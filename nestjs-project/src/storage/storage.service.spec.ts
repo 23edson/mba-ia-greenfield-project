@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { StorageService } from './storage.service';
 import storageConfig from '../config/storage.config';
-import { 
-  S3Client, 
-  CreateMultipartUploadCommand, 
-  UploadPartCommand, 
-  CompleteMultipartUploadCommand, 
-  AbortMultipartUploadCommand, 
-  GetObjectCommand 
+import {
+  S3Client,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand,
+  AbortMultipartUploadCommand,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -39,7 +39,8 @@ describe('StorageService', () => {
     }).compile();
 
     service = module.get<StorageService>(StorageService);
-    s3ClientMock = (S3Client as unknown as jest.Mock).mock.instances[0] as jest.Mocked<S3Client>;
+    s3ClientMock = (S3Client as unknown as jest.Mock).mock
+      .instances[0] as jest.Mocked<S3Client>;
   });
 
   it('should be defined', () => {
@@ -47,10 +48,15 @@ describe('StorageService', () => {
   });
 
   it('should create a multipart upload and return UploadId', async () => {
-    (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({ UploadId: 'test-upload-id' });
-    
-    const uploadId = await service.createMultipartUpload('test-key', 'video/mp4');
-    
+    (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({
+      UploadId: 'test-upload-id',
+    });
+
+    const uploadId = await service.createMultipartUpload(
+      'test-key',
+      'video/mp4',
+    );
+
     expect(uploadId).toBe('test-upload-id');
     expect(s3ClientMock.send).toHaveBeenCalledTimes(1);
     expect(CreateMultipartUploadCommand).toHaveBeenCalledWith({
@@ -62,9 +68,13 @@ describe('StorageService', () => {
 
   it('should generate presigned part URLs', async () => {
     (getSignedUrl as jest.Mock).mockResolvedValue('http://presigned-url');
-    
-    const urls = await service.getPresignedPartUrls('test-key', 'test-upload-id', 2);
-    
+
+    const urls = await service.getPresignedPartUrls(
+      'test-key',
+      'test-upload-id',
+      2,
+    );
+
     expect(urls).toHaveLength(2);
     expect(urls[0]).toBe('http://presigned-url');
     expect(getSignedUrl).toHaveBeenCalledTimes(2);
@@ -78,9 +88,11 @@ describe('StorageService', () => {
 
   it('should complete multipart upload', async () => {
     (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({});
-    
-    await service.completeMultipartUpload('test-key', 'test-upload-id', [{ PartNumber: 1, ETag: 'etag1' }]);
-    
+
+    await service.completeMultipartUpload('test-key', 'test-upload-id', [
+      { PartNumber: 1, ETag: 'etag1' },
+    ]);
+
     expect(s3ClientMock.send).toHaveBeenCalledTimes(1);
     expect(CompleteMultipartUploadCommand).toHaveBeenCalledWith({
       Bucket: 'streamtube-videos',
@@ -94,9 +106,9 @@ describe('StorageService', () => {
 
   it('should abort multipart upload', async () => {
     (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({});
-    
+
     await service.abortMultipartUpload('test-key', 'test-upload-id');
-    
+
     expect(s3ClientMock.send).toHaveBeenCalledTimes(1);
     expect(AbortMultipartUploadCommand).toHaveBeenCalledWith({
       Bucket: 'streamtube-videos',
@@ -107,9 +119,12 @@ describe('StorageService', () => {
 
   it('should generate presigned download URL', async () => {
     (getSignedUrl as jest.Mock).mockResolvedValue('http://download-url');
-    
-    const url = await service.getPresignedDownloadUrl('test-key', { responseContentDisposition: 'attachment; filename="test.mp4"', expiresIn: 3600 });
-    
+
+    const url = await service.getPresignedDownloadUrl('test-key', {
+      responseContentDisposition: 'attachment; filename="test.mp4"',
+      expiresIn: 3600,
+    });
+
     expect(url).toBe('http://download-url');
     expect(getSignedUrl).toHaveBeenCalledTimes(1);
     expect(GetObjectCommand).toHaveBeenCalledWith({
@@ -117,6 +132,8 @@ describe('StorageService', () => {
       Key: 'test-key',
       ResponseContentDisposition: 'attachment; filename="test.mp4"',
     });
-    expect((getSignedUrl as jest.Mock).mock.calls[0][2]).toEqual({ expiresIn: 3600 });
+    expect((getSignedUrl as jest.Mock).mock.calls[0][2]).toEqual({
+      expiresIn: 3600,
+    });
   });
 });

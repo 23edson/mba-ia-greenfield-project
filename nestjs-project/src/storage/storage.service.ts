@@ -1,13 +1,13 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
 import storageConfig from '../config/storage.config';
-import { 
-  S3Client, 
-  CreateMultipartUploadCommand, 
-  UploadPartCommand, 
-  CompleteMultipartUploadCommand, 
-  AbortMultipartUploadCommand, 
-  GetObjectCommand 
+import {
+  S3Client,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand,
+  AbortMultipartUploadCommand,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -19,6 +19,10 @@ export class StorageService {
     @Inject(storageConfig.KEY)
     private config: ConfigType<typeof storageConfig>,
   ) {
+    if (!this.config.accessKey || !this.config.secretKey) {
+      throw new Error('Storage credentials (accessKey or secretKey) are missing. Check environment variables and Joi validation.');
+    }
+
     this.s3Client = new S3Client({
       endpoint: this.config.endpoint,
       region: this.config.region,
@@ -30,7 +34,10 @@ export class StorageService {
     });
   }
 
-  async createMultipartUpload(key: string, contentType: string): Promise<string> {
+  async createMultipartUpload(
+    key: string,
+    contentType: string,
+  ): Promise<string> {
     const command = new CreateMultipartUploadCommand({
       Bucket: this.config.bucketName,
       Key: key,
@@ -40,7 +47,11 @@ export class StorageService {
     return result.UploadId as string;
   }
 
-  async getPresignedPartUrls(key: string, uploadId: string, partCount: number): Promise<string[]> {
+  async getPresignedPartUrls(
+    key: string,
+    uploadId: string,
+    partCount: number,
+  ): Promise<string[]> {
     const urls: string[] = [];
     for (let i = 1; i <= partCount; i++) {
       const command = new UploadPartCommand({
@@ -49,13 +60,19 @@ export class StorageService {
         UploadId: uploadId,
         PartNumber: i,
       });
-      const url = await getSignedUrl(this.s3Client, command, { expiresIn: 7200 });
+      const url = await getSignedUrl(this.s3Client, command, {
+        expiresIn: 7200,
+      });
       urls.push(url);
     }
     return urls;
   }
 
-  async completeMultipartUpload(key: string, uploadId: string, parts: { PartNumber: number, ETag: string }[]): Promise<void> {
+  async completeMultipartUpload(
+    key: string,
+    uploadId: string,
+    parts: { PartNumber: number; ETag: string }[],
+  ): Promise<void> {
     const command = new CompleteMultipartUploadCommand({
       Bucket: this.config.bucketName,
       Key: key,
@@ -76,12 +93,17 @@ export class StorageService {
     await this.s3Client.send(command);
   }
 
-  async getPresignedDownloadUrl(key: string, options?: { responseContentDisposition?: string, expiresIn?: number }): Promise<string> {
+  async getPresignedDownloadUrl(
+    key: string,
+    options?: { responseContentDisposition?: string; expiresIn?: number },
+  ): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.config.bucketName,
       Key: key,
       ResponseContentDisposition: options?.responseContentDisposition,
     });
-    return getSignedUrl(this.s3Client, command, { expiresIn: options?.expiresIn || 7200 });
+    return getSignedUrl(this.s3Client, command, {
+      expiresIn: options?.expiresIn || 7200,
+    });
   }
 }
