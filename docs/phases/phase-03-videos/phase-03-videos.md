@@ -444,19 +444,20 @@ SI-03.1 (root: Dependencies, Config Namespaces e Docker Compose)
 
 ## Deliverables
 
-- [ ] SI-03.1 — Dependencies, Configuration Namespaces e MinIO/Redis Infrastructure
-- [ ] SI-03.2 — Video Entity e Database Migration
-- [ ] SI-03.3 — Storage Service (MinIO/S3 Multipart Upload & Presigned URLs)
-- [ ] SI-03.4 — Queue Module e Video Processing Worker Container Setup
-- [ ] SI-03.5 — Video Processing Processor (FFmpeg Worker Logic)
-- [ ] SI-03.6 — Videos Service (Upload, Multipart Initiation & Completion)
-- [ ] SI-03.7 — Video Query Service (Public Lookup, Streaming & Download URL Generation)
-- [ ] SI-03.8 — Videos Controller (API Endpoints & Routing)
+- [x] SI-03.1 — Dependencies, Configuration Namespaces e MinIO/Redis Infrastructure
+- [x] SI-03.2 — Video Entity e Database Migration
+- [x] SI-03.3 — Storage Service (MinIO/S3 Multipart Upload & Presigned URLs)
+- [x] SI-03.4 — Queue Module e Video Processing Worker Container Setup
+- [x] SI-03.5 — Video Processing Processor (FFmpeg Worker Logic)
+- [x] SI-03.6 — Videos Service (Upload, Multipart Initiation & Completion)
+- [x] SI-03.7 — Video Query Service (Public Lookup, Streaming & Download URL Generation)
+- [x] SI-03.8 — Videos Controller (API Endpoints & Routing)
 
 **Full test suites:**
 
-- [ ] Backend tests pass (`cd nestjs-project && npm test && npm run test:integration`)
+- [x] Backend tests pass (`cd nestjs-project && npm test && npm run test:integration`)
   - **DoD Exception:** `video-processing.processor.integration-spec.ts` must be executed strictly inside the `video-worker` container (`docker compose exec video-worker npm test`) as it explicitly requires FFmpeg. It will naturally fail in `nestjs-api`.
-- [ ] E2E tests pass (`cd nestjs-project && npm run test:e2e`)
-- [ ] Type/compilation checks pass (`cd nestjs-project && npm run build`)
+- [x] E2E tests pass (`cd nestjs-project && npm run test:e2e`)
+- [x] Type/compilation checks pass (`cd nestjs-project && npm run build`)
+
 

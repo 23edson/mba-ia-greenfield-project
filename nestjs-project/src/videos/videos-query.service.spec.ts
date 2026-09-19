@@ -59,7 +59,9 @@ describe('VideosService (Query)', () => {
         createdAt: new Date('2023-01-01T00:00:00Z'),
       };
       videoRepository.findOne.mockResolvedValue(mockVideo);
-      storageService.getPresignedDownloadUrl.mockResolvedValue('https://thumb.url');
+      storageService.getPresignedDownloadUrl.mockResolvedValue(
+        'https://thumb.url',
+      );
 
       const result = await service.findByPublicId('pub123');
 
@@ -76,7 +78,9 @@ describe('VideosService (Query)', () => {
         channelId: 'chan-123',
         createdAt: '2023-01-01T00:00:00.000Z',
       });
-      expect(storageService.getPresignedDownloadUrl).toHaveBeenCalledWith('thumb.jpg');
+      expect(storageService.getPresignedDownloadUrl).toHaveBeenCalledWith(
+        'thumb.jpg',
+      );
     });
   });
 
@@ -89,26 +93,47 @@ describe('VideosService (Query)', () => {
     });
 
     it('should return presigned url with 7200 expiry', async () => {
-      videoRepository.findOne.mockResolvedValue({ status: 'ready', storageKey: 'video.mp4' });
-      storageService.getPresignedDownloadUrl.mockResolvedValue('https://stream.url');
+      videoRepository.findOne.mockResolvedValue({
+        status: 'ready',
+        storageKey: 'video.mp4',
+      });
+      storageService.getPresignedDownloadUrl.mockResolvedValue(
+        'https://stream.url',
+      );
       const url = await service.getStreamUrl('pub123');
       expect(url).toBe('https://stream.url');
-      expect(storageService.getPresignedDownloadUrl).toHaveBeenCalledWith('video.mp4', { expiresIn: 7200 });
+      expect(storageService.getPresignedDownloadUrl).toHaveBeenCalledWith(
+        'video.mp4',
+        { expiresIn: 7200 },
+      );
     });
   });
 
   describe('getDownloadUrl', () => {
     it('should throw VideoNotFoundException if not found', async () => {
       videoRepository.findOne.mockResolvedValue(null);
-      await expect(service.getDownloadUrl('pub123')).rejects.toThrow(VideoNotFoundException);
+      await expect(service.getDownloadUrl('pub123')).rejects.toThrow(
+        VideoNotFoundException,
+      );
     });
 
     it('should return presigned url with content disposition', async () => {
-      videoRepository.findOne.mockResolvedValue({ status: 'ready', storageKey: 'video.mp4', title: 'My Video!@#' });
-      storageService.getPresignedDownloadUrl.mockResolvedValue('https://dl.url');
+      videoRepository.findOne.mockResolvedValue({
+        status: 'ready',
+        storageKey: 'video.mp4',
+        title: 'My Video!@#',
+      });
+      storageService.getPresignedDownloadUrl.mockResolvedValue(
+        'https://dl.url',
+      );
       const url = await service.getDownloadUrl('pub123');
       expect(url).toBe('https://dl.url');
-      expect(storageService.getPresignedDownloadUrl).toHaveBeenCalledWith('video.mp4', { responseContentDisposition: 'attachment; filename="My_Video___.mp4"' });
+      expect(storageService.getPresignedDownloadUrl).toHaveBeenCalledWith(
+        'video.mp4',
+        {
+          responseContentDisposition: 'attachment; filename="My_Video___.mp4"',
+        },
+      );
     });
   });
 });

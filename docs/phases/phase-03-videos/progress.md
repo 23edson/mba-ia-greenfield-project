@@ -43,6 +43,6 @@
 - **Observations:** Implemented `findByPublicId`, `getStreamUrl` and `getDownloadUrl` directly in `VideosService` returning presigned URLs from S3. Added validation for `VideoNotReadyException` (HTTP 409). Handled `response-content-disposition` in S3 options directly to prompt browser downloads on the download endpoint. Integrated tests into `videos.service.integration-spec.ts`.
 
 ### SI-03.8 — Videos Controller (API Endpoints & Routing)
-- **Status:** pending
-- **Tests:** pending
-- **Observations:** pending
+- **Status:** completed
+- **Tests:** completed (Controller is E2E-only; unit/integration pass)
+- **Observations:** Implemented `VideosController` exposing REST endpoints `POST /videos`, `POST /videos/:id/upload/complete`, `GET /videos/:publicId`, `GET /videos/:publicId/stream`, and `GET /videos/:publicId/download`. Registered it in `VideosModule`. Used `JwtAuthGuard`, `CurrentUser` decorators and `@Redirect` for presigned streaming/download URLs.

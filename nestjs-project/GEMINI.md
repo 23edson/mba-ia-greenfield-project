@@ -162,3 +162,23 @@ NestJS with standard module structure. Source lives in `src/`, compiled output i
 ## REST Conventions
 
 This is a RESTful API. All endpoints must follow standard REST conventions — correct HTTP methods, proper status codes, plural resource nouns, and consistent URL structure. Details are enforced via rules on controller files.
+
+## Videos Module (Phase 03)
+
+The video processing pipeline involves multiple components:
+- **Module Structure**: `src/videos/` containing the `VideosController`, `VideosService`, `Video` entity, and DTOs.
+- **Endpoints**:
+  - `POST /videos`: Create a draft video and generate multipart upload presigned URLs.
+  - `POST /videos/:id/upload/complete`: Complete the upload and enqueue the video for processing.
+  - `GET /videos/:publicId`: Get video metadata (public endpoint).
+  - `GET /videos/:publicId/stream`: Get a presigned streaming URL (302 redirect).
+  - `GET /videos/:publicId/download`: Get a presigned download URL (302 redirect).
+- **Compose Services**:
+  - `minio`: Object storage compatible with S3 API for raw and processed video files.
+  - `redis`: In-memory data structure store used by BullMQ for the queue.
+  - `video-worker`: Standalone NestJS application containing FFmpeg and FFprobe to process videos asynchronously.
+- **Status Lifecycle**:
+  - `draft`: Created but upload not completed.
+  - `processing`: Upload finished, enqueued for FFmpeg extraction and optimization.
+  - `ready`: Processing finished, thumbnail and optimized MP4 are available for streaming/download.
+  - `error`: Failed during processing (invalid format, FFmpeg crash, etc).
