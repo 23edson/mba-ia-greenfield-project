@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { ArrayNotEmpty, IsArray, IsNumber, IsString, ValidateNested } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 export class PartDto {
   @IsNumber()

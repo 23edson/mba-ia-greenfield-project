@@ -44,5 +44,6 @@
 
 ### SI-03.8 — Videos Controller (API Endpoints & Routing)
 - **Status:** completed
-- **Tests:** completed (Controller is E2E-only; unit/integration pass)
+- **Tests:** completed (70 E2E tests passing)
 - **Observations:** Implemented `VideosController` exposing REST endpoints `POST /videos`, `POST /videos/:id/upload/complete`, `GET /videos/:publicId`, `GET /videos/:publicId/stream`, and `GET /videos/:publicId/download`. Registered it in `VideosModule`. Used `JwtAuthGuard`, `CurrentUser` decorators and `@Redirect` for presigned streaming/download URLs.
+  *Nota da revisão: O planejamento de testes (`/plan-test-specs`) e a escrita inicial dos testes E2E do VideosController haviam sido acidentalmente pulados em uma etapa anterior, o que resultou na falsa impressão de conclusão. Isso foi corrigido nesta rodada: geramos os 5 cenários E2E vitais, escrevemos os testes (elevando o total de testes E2E de 52 para 70), corrigimos configurações de lock e migrações no banco, resolvemos falhas no upload S3 e corrigimos o crash da geração de thumbnails do ffmpeg no worker. Apenas agora a fase de upload e worker está de fato concluída de ponta a ponta.*

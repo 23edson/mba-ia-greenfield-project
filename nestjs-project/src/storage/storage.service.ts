@@ -132,13 +132,12 @@ export class StorageService {
     localPath: string,
     contentType: string,
   ): Promise<void> {
-    const stat = await fsp.stat(localPath);
+    const fileBuffer = await fsp.readFile(localPath);
     const command = new PutObjectCommand({
       Bucket: this.config.bucketName,
       Key: key,
-      Body: fs.createReadStream(localPath),
+      Body: fileBuffer,
       ContentType: contentType,
-      ContentLength: stat.size,
     });
     await this.s3Client.send(command);
   }

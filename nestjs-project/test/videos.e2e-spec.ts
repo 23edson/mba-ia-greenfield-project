@@ -49,7 +49,8 @@ describe('Videos (e2e)', () => {
     videosRepository = dataSource.getRepository(Video);
     usersRepository = dataSource.getRepository(User);
     jwtService = moduleFixture.get(JwtService);
-    throttlerStorage = moduleFixture.get<ThrottlerStorageService>(ThrottlerStorage);
+    throttlerStorage =
+      moduleFixture.get<ThrottlerStorageService>(ThrottlerStorage);
   });
 
   afterAll(async () => {
@@ -62,13 +63,15 @@ describe('Videos (e2e)', () => {
   });
 
   let counter = 0;
-  async function createUserAndLogin(email = `user_${Date.now()}_${++counter}@example.com`) {
+  async function createUserAndLogin(
+    email = `user_${Date.now()}_${++counter}@example.com`,
+  ) {
     const authService = app.get(AuthService);
     const mailServiceInstance = (authService as any).mailService;
     let capturedToken = '';
     jest
       .spyOn(mailServiceInstance, 'sendConfirmationEmail')
-      .mockImplementationOnce(async (_e, _n, t) => {
+      .mockImplementationOnce(async (_e: string, _n: string, t: string) => {
         capturedToken = t;
       });
 
@@ -85,9 +88,10 @@ describe('Videos (e2e)', () => {
       .send({ email, password: 'password123' });
 
     const accessToken = res.body.access_token;
-    if (!accessToken) throw new Error('Failed to login, response: ' + JSON.stringify(res.body));
-    
-    const payload = jwtService.decode(accessToken) as any;
+    if (!accessToken)
+      throw new Error('Failed to login, response: ' + JSON.stringify(res.body));
+
+    const payload = jwtService.decode(accessToken);
     const userId = payload.sub;
 
     return { accessToken, userId };
@@ -271,7 +275,7 @@ describe('Videos (e2e)', () => {
         .post(`/videos/00000000-0000-0000-0000-000000000000/upload/complete`)
         .set('Authorization', `Bearer ${accessToken}`)
         .send({
-          parts: [], 
+          parts: [],
         })
         .expect(400);
       expect(res.body.error).toBe('VALIDATION_ERROR');
@@ -332,7 +336,9 @@ describe('Videos (e2e)', () => {
     });
 
     it('returns 404 VIDEO_NOT_FOUND', async () => {
-      await request(app.getHttpServer()).get('/videos/missing12345/stream').expect(404);
+      await request(app.getHttpServer())
+        .get('/videos/missing12345/stream')
+        .expect(404);
     });
 
     it('returns 409 VIDEO_NOT_READY', async () => {
@@ -380,7 +386,9 @@ describe('Videos (e2e)', () => {
     });
 
     it('returns 404 VIDEO_NOT_FOUND', async () => {
-      await request(app.getHttpServer()).get('/videos/missing12345/download').expect(404);
+      await request(app.getHttpServer())
+        .get('/videos/missing12345/download')
+        .expect(404);
     });
 
     it('returns 409 VIDEO_NOT_READY', async () => {
@@ -404,4 +412,3 @@ describe('Videos (e2e)', () => {
     });
   });
 });
-

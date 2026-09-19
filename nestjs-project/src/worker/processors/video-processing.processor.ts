@@ -161,11 +161,9 @@ export class VideoProcessingProcessor extends WorkerHost {
     duration: number,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      const timestamp = duration > 10 ? '10%' : '00:00:01';
-
       ffmpeg(inputPath)
         .screenshots({
-          timestamps: [timestamp],
+          timestamps: ['50%'],
           filename: path.basename(outputPath),
           folder: path.dirname(outputPath),
         })

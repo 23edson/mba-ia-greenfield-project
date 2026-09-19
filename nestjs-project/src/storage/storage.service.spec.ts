@@ -12,6 +12,7 @@ import {
   GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import * as fsp from 'fs/promises';
 
 jest.mock('@aws-sdk/client-s3');
 jest.mock('@aws-sdk/s3-request-presigner');
@@ -153,11 +154,14 @@ describe('StorageService', () => {
   });
 
   describe('uploadFile', () => {
+    let readFileSpy: jest.SpyInstance;
     beforeEach(() => {
-      jest.spyOn(fs, 'createReadStream').mockReturnValue({
-        on: jest.fn(),
-        pipe: jest.fn(),
-      } as any);
+      readFileSpy = jest
+        .spyOn(fs.promises, 'readFile')
+        .mockResolvedValue(Buffer.from('test') as any);
+    });
+    afterEach(() => {
+      readFileSpy.mockRestore();
     });
 
     it('should call PutObjectCommand', async () => {

@@ -1,0 +1,111 @@
+0. Limpando emails no Mailpit...
+1. Registrando usuário manual_test_1789844251@example.com
+HTTP/1.1 201 Created
+X-Powered-By: Express
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 9
+X-RateLimit-Reset: 60
+Content-Type: application/json; charset=utf-8
+Content-Length: 90
+ETag: W/"5a-fC5XEl0GmOmWdxlluA23qx23u60"
+Date: Sat, 19 Sep 2026 18:57:31 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"id":"dae0ebe0-3c66-415e-96b4-8647861b898f","email":"manual_test_1789844251@example.com"}
+2. Pegando token de confirmação no Mailpit...
+3. Confirmando email... (f157570e4892d557b38d3d767a79ec9ff54c66bbb6ab182e0eab3ca28f7a39a6)
+HTTP/1.1 204 No Content
+X-Powered-By: Express
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 9
+X-RateLimit-Reset: 60
+Date: Sat, 19 Sep 2026 18:57:33 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+
+4. Fazendo login...
+5. Criando vídeo (Draft)...
+HTTP/1.1 201 Created
+X-Powered-By: Express
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 9
+X-RateLimit-Reset: 60
+Content-Type: application/json; charset=utf-8
+Content-Length: 862
+ETag: W/"35e-6RaSwpgbg5kpnwSS6QlD+8DMyWo"
+Date: Sat, 19 Sep 2026 18:57:33 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"id":"bcd6d021-01da-4dd8-9bda-672b03cfbe2b","publicId":"zprZPdFfRmDz","status":"draft","uploadId":"MzlkM2UzZDQtZjBkNi00M2M4LTg4N2EtMjEzZTgxN2Y5MTJlLjkwMjYwNGRkLTI0ZDUtNDRjYi05ODU3LWFkYmZhMzdiYzAyM3gxNzg5ODQ0MjUzOTI5NzA3NjY4","partUrls":["http://minio:9000/streamtube-videos/uploads/bcd6d021-01da-4dd8-9bda-672b03cfbe2b/original.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=minioadmin%2F20260919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260919T185733Z&X-Amz-Expires=7200&X-Amz-Signature=695d5d178d5fe2bc7b60cbfb3d846d8b962e5d4286956328db649d49925af0f8&X-Amz-SignedHeaders=host&partNumber=1&uploadId=MzlkM2UzZDQtZjBkNi00M2M4LTg4N2EtMjEzZTgxN2Y5MTJlLjkwMjYwNGRkLTI0ZDUtNDRjYi05ODU3LWFkYmZhMzdiYzAyM3gxNzg5ODQ0MjUzOTI5NzA3NjY4&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-sdk-checksum-algorithm=CRC32&x-id=UploadPart"]}
+
+Video ID: bcd6d021-01da-4dd8-9bda-672b03cfbe2b
+Public ID: zprZPdFfRmDz
+Part URL: http://minio:9000/streamtube-videos/uploads/bcd6d021-01da-4dd8-9bda-672b03cfbe2b/original.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=minioadmin%2F20260919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260919T185733Z&X-Amz-Expires=7200&X-Amz-Signature=695d5d178d5fe2bc7b60cbfb3d846d8b962e5d4286956328db649d49925af0f8&X-Amz-SignedHeaders=host&partNumber=1&uploadId=MzlkM2UzZDQtZjBkNi00M2M4LTg4N2EtMjEzZTgxN2Y5MTJlLjkwMjYwNGRkLTI0ZDUtNDRjYi05ODU3LWFkYmZhMzdiYzAyM3gxNzg5ODQ0MjUzOTI5NzA3NjY4&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-sdk-checksum-algorithm=CRC32&x-id=UploadPart
+
+6. Fazendo upload de um arquivo real (pequeno)...
+ETag: ec4da1bb6b59923c53501a2f61e23c97
+
+7. Completando upload...
+HTTP/1.1 200 OK
+X-Powered-By: Express
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 9
+X-RateLimit-Reset: 60
+Content-Type: application/json; charset=utf-8
+Content-Length: 93
+ETag: W/"5d-GVtY2f999kW90SS5xsoWxSr9pY4"
+Date: Sat, 19 Sep 2026 18:57:33 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"id":"bcd6d021-01da-4dd8-9bda-672b03cfbe2b","publicId":"zprZPdFfRmDz","status":"processing"}
+
+8. Aguardando 15 segundos para o worker processar...
+
+9. Buscando status atualizado...
+HTTP/1.1 200 OK
+X-Powered-By: Express
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 9
+X-RateLimit-Reset: 60
+Content-Type: application/json; charset=utf-8
+Content-Length: 716
+ETag: W/"2cc-A6bUMWgdcAFx8RwFMJejGh6WNqA"
+Date: Sat, 19 Sep 2026 18:57:49 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"id":"bcd6d021-01da-4dd8-9bda-672b03cfbe2b","publicId":"zprZPdFfRmDz","title":"Video de Teste Manual","description":null,"status":"ready","duration":1,"width":128,"height":72,"thumbnailUrl":"http://minio:9000/streamtube-videos/uploads/bcd6d021-01da-4dd8-9bda-672b03cfbe2b/thumbnail.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=minioadmin%2F20260919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260919T185749Z&X-Amz-Expires=7200&X-Amz-Signature=cf1034c597245883a8d79c4a82144a7056dd367504ffb28a5750c7b0120b3d1c&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject","channelId":"87f5ef45-77dd-4387-90f2-ec1fb8c58b1c","createdAt":"2026-09-19T18:57:33.923Z"}
+
+10. Testando Stream (GET /videos/zprZPdFfRmDz/stream)...
+HTTP/1.1 302 Found
+X-Powered-By: Express
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 9
+X-RateLimit-Reset: 60
+Location: http://minio:9000/streamtube-videos/uploads/bcd6d021-01da-4dd8-9bda-672b03cfbe2b/original.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=minioadmin%2F20260919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260919T185749Z&X-Amz-Expires=7200&X-Amz-Signature=c3889f7dfcfc4f7c3cd342a53ff732bbe0895a66964246130239cf08ab0d2e41&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+Vary: Accept
+Content-Type: text/plain; charset=utf-8
+Content-Length: 453
+Date: Sat, 19 Sep 2026 18:57:49 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+
+11. Testando Download (GET /videos/zprZPdFfRmDz/download)...
+HTTP/1.1 302 Found
+X-Powered-By: Express
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 9
+X-RateLimit-Reset: 60
+Location: http://minio:9000/streamtube-videos/uploads/bcd6d021-01da-4dd8-9bda-672b03cfbe2b/original.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=minioadmin%2F20260919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260919T185749Z&X-Amz-Expires=7200&X-Amz-Signature=b833d462ac18c8a245656cc164e156de1cbcad1c97677cc832bca687c1aec7d0&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3D%22Video_de_Teste_Manual.mp4%22&x-amz-checksum-mode=ENABLED&x-id=GetObject
+Vary: Accept
+Content-Type: text/plain; charset=utf-8
+Content-Length: 541
+Date: Sat, 19 Sep 2026 18:57:49 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
