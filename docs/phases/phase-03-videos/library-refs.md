@@ -372,6 +372,7 @@ import { FfmpegCommand, FfprobeData } from 'fluent-ffmpeg';
 ### nanoid
 
 Compact, URL-friendly, cryptographically secure unique string ID generator. Used for public video URLs (12 characters).
+**Note**: Using version `^3.x` (3.3.19) instead of `^5.x` due to ESM compatibility issues with Jest/CommonJS in NestJS.
 
 ```typescript
 import { customAlphabet } from 'nanoid';

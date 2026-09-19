@@ -296,6 +296,8 @@ The backend authorizes access to the video and returns a presigned URL pointing 
 
 **Decision:** Option B (NanoID - 12-character public ID with internal UUID v7)
 
+**Note:** O projeto fez o downgrade do NanoID para a versão `^3.x` (3.3.19) em vez da `^5.x` devido a incompatibilidades de módulos ESM puro (ECMAScript Modules) com o ambiente de testes Jest/CommonJS do NestJS. A versão v3 mantém a mesma funcionalidade (`customAlphabet`, etc.) com suporte nativo a CommonJS.
+
 **Libraries:** nanoid
 
 We will implement Option B (UUID v7 internally and an immutable 12-character NanoID as the public URL identifier).
