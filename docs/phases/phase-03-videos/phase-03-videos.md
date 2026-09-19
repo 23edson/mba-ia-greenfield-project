@@ -456,6 +456,7 @@ SI-03.1 (root: Dependencies, Config Namespaces e Docker Compose)
 **Full test suites:**
 
 - [ ] Backend tests pass (`cd nestjs-project && npm test && npm run test:integration`)
+  - **DoD Exception:** `video-processing.processor.integration-spec.ts` must be executed strictly inside the `video-worker` container (`docker compose exec video-worker npm test`) as it explicitly requires FFmpeg. It will naturally fail in `nestjs-api`.
 - [ ] E2E tests pass (`cd nestjs-project && npm run test:e2e`)
 - [ ] Type/compilation checks pass (`cd nestjs-project && npm run build`)
 

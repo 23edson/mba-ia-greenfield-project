@@ -8,8 +8,11 @@ import {
   CompleteMultipartUploadCommand,
   AbortMultipartUploadCommand,
   GetObjectCommand,
+  PutObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import * as fs from 'fs';
+import { pipeline } from 'stream/promises';
 
 @Injectable()
 export class StorageService {
@@ -105,5 +108,29 @@ export class StorageService {
     return getSignedUrl(this.s3Client, command, {
       expiresIn: options?.expiresIn || 7200,
     });
+  }
+
+  async downloadFile(key: string, localPath: string): Promise<void> {
+    const command = new GetObjectCommand({
+      Bucket: this.config.bucketName,
+      Key: key,
+    });
+    const result = await this.s3Client.send(command);
+    
+    if (!result.Body) {
+      throw new Error(`File not found: ${key}`);
+    }
+    
+    await pipeline(result.Body as any, fs.createWriteStream(localPath));
+  }
+
+  async uploadFile(key: string, localPath: string, contentType: string): Promise<void> {
+    const command = new PutObjectCommand({
+      Bucket: this.config.bucketName,
+      Key: key,
+      Body: fs.createReadStream(localPath),
+      ContentType: contentType,
+    });
+    await this.s3Client.send(command);
   }
 }

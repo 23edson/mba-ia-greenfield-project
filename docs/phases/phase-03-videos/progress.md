@@ -27,9 +27,10 @@
 - **Observations:** Configured BullMQ `VideoProcessingQueueModule` for `video-processing` queue with exponential backoff retry policies. Created `Dockerfile.worker` containing `ffmpeg` and `ffprobe`. Added `video-worker` service in `compose.yaml` mapping the temporary volume `/tmp/video-jobs`. Implemented the standalone `worker.ts` bootstrap entry point.
 
 ### SI-03.5 — Video Processing Processor (FFmpeg Worker Logic)
-- **Status:** pending
-- **Tests:** pending
-- **Observations:** pending
+- **Status:** completed
+- **Tests:** 2/2 passing (video-processing.processor.spec.ts, video-processing.processor.integration-spec.ts)
+- **Observations:** Implemented `VideoProcessingProcessor` that extends `WorkerHost` from `@nestjs/bullmq`. Added logic to check idempotency and avoid duplicates. Added extraction of metadata with FFprobe, generation of thumbnails and optimization for faststart using FFmpeg, uploading back to the storage and updating DB status. In case of error, records it in `errorLog` and throws `UnrecoverableError`. Included download and upload utilities in `StorageService`. Included missing module configurations.
+  - **TESTING NOTE:** The integration test `video-processing.processor.integration-spec.ts` relies on physical FFmpeg/FFprobe binaries. It MUST be executed strictly inside the `video-worker` container (`docker compose exec video-worker npm test -- <file>`). Running it globally in `nestjs-api` (e.g. via `npm test -- --runInBand`) will result in a natural `ffmpeg: not found` failure. Add this exception to the final Definition of Done.
 
 ### SI-03.6 — Videos Service (Upload, Multipart Initiation & Completion)
 - **Status:** pending

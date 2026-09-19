@@ -7,6 +7,12 @@ import queueConfig from '../config/queue.config';
 import storageConfig from '../config/storage.config';
 import { VideoProcessingQueueModule } from '../queue/video-processing-queue.module';
 
+import { VideoProcessingProcessor } from './processors/video-processing.processor';
+import { Video } from '../videos/entities/video.entity';
+import { Channel } from '../channels/entities/channel.entity';
+import { User } from '../users/entities/user.entity';
+import { StorageModule } from '../storage/storage.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -27,7 +33,10 @@ import { VideoProcessingQueueModule } from '../queue/video-processing-queue.modu
         synchronize: false,
       }),
     }),
+    TypeOrmModule.forFeature([Video, Channel, User]),
+    StorageModule,
     VideoProcessingQueueModule,
   ],
+  providers: [VideoProcessingProcessor],
 })
 export class WorkerAppModule {}

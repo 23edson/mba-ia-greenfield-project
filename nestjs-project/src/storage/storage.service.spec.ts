@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import { Test, TestingModule } from '@nestjs/testing';
 import { StorageService } from './storage.service';
 import storageConfig from '../config/storage.config';
@@ -41,6 +42,10 @@ describe('StorageService', () => {
     service = module.get<StorageService>(StorageService);
     s3ClientMock = (S3Client as unknown as jest.Mock).mock
       .instances[0] as jest.Mocked<S3Client>;
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should be defined', () => {
@@ -87,7 +92,7 @@ describe('StorageService', () => {
   });
 
   it('should complete multipart upload', async () => {
-    (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({});
+    (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({} as any);
 
     await service.completeMultipartUpload('test-key', 'test-upload-id', [
       { PartNumber: 1, ETag: 'etag1' },
@@ -105,7 +110,7 @@ describe('StorageService', () => {
   });
 
   it('should abort multipart upload', async () => {
-    (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({});
+    (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({} as any);
 
     await service.abortMultipartUpload('test-key', 'test-upload-id');
 
@@ -134,6 +139,28 @@ describe('StorageService', () => {
     });
     expect((getSignedUrl as jest.Mock).mock.calls[0][2]).toEqual({
       expiresIn: 3600,
+    });
+  });
+
+  describe('downloadFile', () => {
+    it('should throw an error if body is missing', async () => {
+      (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({} as any);
+      await expect(service.downloadFile('test-key', '/tmp/file.mp4')).rejects.toThrow('File not found: test-key');
+    });
+  });
+
+  describe('uploadFile', () => {
+    beforeEach(() => {
+      jest.spyOn(fs, 'createReadStream').mockReturnValue({
+        on: jest.fn(),
+        pipe: jest.fn(),
+      } as any);
+    });
+
+    it('should call PutObjectCommand', async () => {
+      (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({} as any);
+      await service.uploadFile('test-key', '/tmp/file.mp4', 'video/mp4');
+      expect(s3ClientMock.send).toHaveBeenCalled();
     });
   });
 });
