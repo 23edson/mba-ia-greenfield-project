@@ -138,7 +138,7 @@ export class StorageService {
     return new Promise<void>((resolve, reject) => {
       // Captura erros da leitura do arquivo (durante a stream) e rejeita a Promise explicitamente
       fileStream.on('error', (err) => {
-        reject(err);
+        reject(err instanceof Error ? err : new Error(String(err)));
       });
 
       const command = new PutObjectCommand({
@@ -152,7 +152,9 @@ export class StorageService {
       this.s3Client
         .send(command)
         .then(() => resolve())
-        .catch((err) => reject(err));
+        .catch((err) =>
+          reject(err instanceof Error ? err : new Error(String(err))),
+        );
     });
   }
 }
