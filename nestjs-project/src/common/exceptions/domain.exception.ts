@@ -48,3 +48,27 @@ export class TokenReuseDetectedException extends DomainException {
     );
   }
 }
+
+export class VideoNotFoundException extends DomainException {
+  constructor() {
+    super('VIDEO_NOT_FOUND', 404, 'Video not found');
+  }
+}
+
+export class VideoNotInDraftException extends DomainException {
+  constructor() {
+    super('VIDEO_NOT_IN_DRAFT', 409, 'Video is not in draft status');
+  }
+}
+
+export class ChannelNotFoundException extends DomainException {
+  constructor() {
+    super('CHANNEL_NOT_FOUND', 403, 'User does not have a channel');
+  }
+}
+
+export class ForbiddenException extends DomainException {
+  constructor() {
+    super('FORBIDDEN', 403, 'Access denied');
+  }
+}

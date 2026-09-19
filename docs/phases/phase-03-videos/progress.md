@@ -33,9 +33,9 @@
   - **TESTING NOTE:** The integration test `video-processing.processor.integration-spec.ts` relies on physical FFmpeg/FFprobe binaries. It MUST be executed strictly inside the `video-worker` container (`docker compose exec video-worker npm test -- <file>`). Running it globally in `nestjs-api` (e.g. via `npm test -- --runInBand`) will result in a natural `ffmpeg: not found` failure. Add this exception to the final Definition of Done.
 
 ### SI-03.6 — Videos Service (Upload, Multipart Initiation & Completion)
-- **Status:** pending
-- **Tests:** pending
-- **Observations:** pending
+- **Status:** completed
+- **Tests:** 12/12 passing (unit and integration tests)
+- **Observations:** Implemented `createDraft` (generating publicId with `crypto` fallback instead of `nanoid` ESM module to avoid Jest issues) and `completeUpload` (triggering multipart completion and pushing to BullMQ). Added `uploadId` to `CompleteUploadDto` so the client can pass it back. Created appropriate domain exceptions.
 
 ### SI-03.7 — Video Query Service (Public Lookup, Streaming & Download URL Generation)
 - **Status:** pending

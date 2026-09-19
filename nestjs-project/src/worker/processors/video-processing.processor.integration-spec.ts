@@ -13,7 +13,9 @@ describe('VideoProcessingProcessor (Integration)', () => {
 
   beforeAll(async () => {
     // Generate a real sample video for ffprobe to analyze
-    await execAsync('ffmpeg -f lavfi -i color=c=black:s=128x72:d=1 -c:v libx264 -movflags +faststart /tmp/sample.mp4 -y');
+    await execAsync(
+      'ffmpeg -f lavfi -i color=c=black:s=128x72:d=1 -c:v libx264 -movflags +faststart /tmp/sample.mp4 -y',
+    );
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -29,7 +31,7 @@ describe('VideoProcessingProcessor (Integration)', () => {
   it('should extract metadata using real ffprobe', async () => {
     const samplePath = '/tmp/sample.mp4';
     const metadata = await (processor as any).getMetadata(samplePath);
-    
+
     expect(metadata.duration).toBeCloseTo(1.0, 1);
     expect(metadata.width).toBe(128);
     expect(metadata.height).toBe(72);

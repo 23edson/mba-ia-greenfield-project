@@ -37,12 +37,19 @@ export class VideoProcessingProcessor extends WorkerHost {
       throw new UnrecoverableError(`Video ${videoId} not found`);
     }
 
-    if (video.status !== VideoStatus.DRAFT && video.status !== VideoStatus.PROCESSING) {
-      this.logger.warn(`Video ${videoId} is in status ${video.status}, ignoring`);
+    if (
+      video.status !== VideoStatus.DRAFT &&
+      video.status !== VideoStatus.PROCESSING
+    ) {
+      this.logger.warn(
+        `Video ${videoId} is in status ${video.status}, ignoring`,
+      );
       return;
     }
 
-    await this.videosRepository.update(videoId, { status: VideoStatus.PROCESSING });
+    await this.videosRepository.update(videoId, {
+      status: VideoStatus.PROCESSING,
+    });
 
     // ensure tmp dir
     await fs.mkdir(this.tmpDir, { recursive: true });
@@ -66,7 +73,10 @@ export class VideoProcessingProcessor extends WorkerHost {
         this.logger.debug(`Optimizing to faststart for ${videoId}`);
         await this.convertToFaststart(rawPath, faststartPath);
       } catch (videoErr: any) {
-        this.logger.error(`Invalid video file ${videoId}: ${videoErr.message}`, videoErr.stack);
+        this.logger.error(
+          `Invalid video file ${videoId}: ${videoErr.message}`,
+          videoErr.stack,
+        );
         const errorLog = videoErr.stack || videoErr.message;
         await this.videosRepository.update(videoId, {
           status: VideoStatus.ERROR,
@@ -77,8 +87,16 @@ export class VideoProcessingProcessor extends WorkerHost {
 
       this.logger.debug(`Uploading assets for ${videoId}`);
       const thumbnailKey = `uploads/${videoId}/thumbnail.jpg`;
-      await this.storageService.uploadFile(thumbnailKey, thumbPath, 'image/jpeg');
-      await this.storageService.uploadFile(storageKey, faststartPath, 'video/mp4');
+      await this.storageService.uploadFile(
+        thumbnailKey,
+        thumbPath,
+        'image/jpeg',
+      );
+      await this.storageService.uploadFile(
+        storageKey,
+        faststartPath,
+        'video/mp4',
+      );
 
       this.logger.debug(`Updating video status to ready for ${videoId}`);
       await this.videosRepository.update(videoId, {
@@ -94,7 +112,10 @@ export class VideoProcessingProcessor extends WorkerHost {
       if (error instanceof UnrecoverableError) {
         throw error;
       }
-      this.logger.error(`Transient error processing video ${videoId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Transient error processing video ${videoId}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     } finally {
       // Cleanup
@@ -103,19 +124,24 @@ export class VideoProcessingProcessor extends WorkerHost {
           await fs.unlink(file);
         } catch (err: any) {
           if (err.code !== 'ENOENT') {
-            this.logger.warn(`Failed to delete temp file ${file}: ${err.message}`);
+            this.logger.warn(
+              `Failed to delete temp file ${file}: ${err.message}`,
+            );
           }
         }
       }
     }
   }
 
-  private getMetadata(filePath: string): Promise<{ duration: number; width: number; height: number }> {
+  private getMetadata(
+    filePath: string,
+  ): Promise<{ duration: number; width: number; height: number }> {
     return new Promise((resolve, reject) => {
       ffmpeg.ffprobe(filePath, (err, data) => {
-        if (err) return reject(err);
+        if (err)
+          return reject(err instanceof Error ? err : new Error(String(err)));
 
-        const videoStream = data.streams.find(s => s.codec_type === 'video');
+        const videoStream = data.streams.find((s) => s.codec_type === 'video');
         if (!videoStream) {
           return reject(new Error('No video stream found'));
         }
@@ -129,10 +155,14 @@ export class VideoProcessingProcessor extends WorkerHost {
     });
   }
 
-  private generateThumbnail(inputPath: string, outputPath: string, duration: number): Promise<void> {
+  private generateThumbnail(
+    inputPath: string,
+    outputPath: string,
+    duration: number,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       const timestamp = duration > 10 ? '10%' : '00:00:01';
-      
+
       (ffmpeg as any)(inputPath)
         .screenshots({
           timestamps: [timestamp],
@@ -140,17 +170,24 @@ export class VideoProcessingProcessor extends WorkerHost {
           folder: path.dirname(outputPath),
         })
         .on('end', () => resolve())
-        .on('error', (err: any) => reject(err));
+        .on('error', (err: any) =>
+          reject(err instanceof Error ? err : new Error(String(err))),
+        );
     });
   }
 
-  private convertToFaststart(inputPath: string, outputPath: string): Promise<void> {
+  private convertToFaststart(
+    inputPath: string,
+    outputPath: string,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       (ffmpeg as any)(inputPath)
         .outputOptions(['-c copy', '-movflags +faststart'])
         .save(outputPath)
         .on('end', () => resolve())
-        .on('error', (err: any) => reject(err));
+        .on('error', (err: any) =>
+          reject(err instanceof Error ? err : new Error(String(err))),
+        );
     });
   }
 }

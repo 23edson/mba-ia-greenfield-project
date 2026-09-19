@@ -1,4 +1,5 @@
-import * as fs from 'fs';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+import fs = require('fs');
 import { Test, TestingModule } from '@nestjs/testing';
 import { StorageService } from './storage.service';
 import storageConfig from '../config/storage.config';
@@ -145,7 +146,9 @@ describe('StorageService', () => {
   describe('downloadFile', () => {
     it('should throw an error if body is missing', async () => {
       (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({} as any);
-      await expect(service.downloadFile('test-key', '/tmp/file.mp4')).rejects.toThrow('File not found: test-key');
+      await expect(
+        service.downloadFile('test-key', '/tmp/file.mp4'),
+      ).rejects.toThrow('File not found: test-key');
     });
   });
 

@@ -15,10 +15,17 @@ async function bootstrap() {
   const videoRepo = app.get(getRepositoryToken(Video));
   const channelRepo = app.get(getRepositoryToken(Channel));
   // We need to inject the queue. Let's just create a bullmq queue manually
-  const queue = new Queue('video-processing', { connection: { host: 'redis', port: 6379 } });
+  const queue = new Queue('video-processing', {
+    connection: { host: 'redis', port: 6379 },
+  });
 
   console.log('Creating channel...');
-  const channel = await channelRepo.save({ name: 'test channel', nickname: '@testchannel', description: '', userId: '11111111-1111-1111-1111-111111111111' });
+  const channel = await channelRepo.save({
+    name: 'test channel',
+    nickname: '@testchannel',
+    description: '',
+    userId: '11111111-1111-1111-1111-111111111111',
+  });
 
   console.log('Creating video...');
   const video = await videoRepo.save({
@@ -26,17 +33,25 @@ async function bootstrap() {
     publicId: 'testvid12345',
     status: VideoStatus.PROCESSING,
     storageKey: 'uploads/testvid12345/original.mp4',
-    channelId: channel.id
+    channelId: channel.id,
   });
 
   console.log('Uploading sample video to MinIO...');
-  await storageService.uploadFile(video.storageKey, '/tmp/sample.mp4', 'video/mp4');
+  await storageService.uploadFile(
+    video.storageKey,
+    '/tmp/sample.mp4',
+    'video/mp4',
+  );
 
   console.log('Enqueuing job...');
-  await queue.add('process', { videoId: video.id, storageKey: video.storageKey }, { jobId: video.id });
+  await queue.add(
+    'process',
+    { videoId: video.id, storageKey: video.storageKey },
+    { jobId: video.id },
+  );
 
   console.log('Done enqueuing. Waiting 10s for worker to process...');
-  await new Promise(r => setTimeout(r, 10000));
+  await new Promise((r) => setTimeout(r, 10000));
 
   console.log('Checking DB...');
   const updatedVideo = await videoRepo.findOneBy({ id: video.id });
@@ -45,4 +60,4 @@ async function bootstrap() {
   await app.close();
 }
 
-bootstrap();
+bootstrap().catch(console.error);

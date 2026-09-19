@@ -23,7 +23,9 @@ export class StorageService {
     private config: ConfigType<typeof storageConfig>,
   ) {
     if (!this.config.accessKey || !this.config.secretKey) {
-      throw new Error('Storage credentials (accessKey or secretKey) are missing. Check environment variables and Joi validation.');
+      throw new Error(
+        'Storage credentials (accessKey or secretKey) are missing. Check environment variables and Joi validation.',
+      );
     }
 
     this.s3Client = new S3Client({
@@ -116,15 +118,19 @@ export class StorageService {
       Key: key,
     });
     const result = await this.s3Client.send(command);
-    
+
     if (!result.Body) {
       throw new Error(`File not found: ${key}`);
     }
-    
+
     await pipeline(result.Body as any, fs.createWriteStream(localPath));
   }
 
-  async uploadFile(key: string, localPath: string, contentType: string): Promise<void> {
+  async uploadFile(
+    key: string,
+    localPath: string,
+    contentType: string,
+  ): Promise<void> {
     const command = new PutObjectCommand({
       Bucket: this.config.bucketName,
       Key: key,

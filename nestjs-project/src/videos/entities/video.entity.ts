@@ -46,6 +46,9 @@ export class Video {
   @Column({ type: 'varchar', length: 512, nullable: true })
   thumbnailKey: string | null;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  uploadId: string | null;
+
   @Column({ type: 'float', nullable: true })
   duration: number | null;
 
