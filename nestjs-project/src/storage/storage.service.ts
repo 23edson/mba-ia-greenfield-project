@@ -12,6 +12,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as fs from 'fs';
+import * as fsp from 'fs/promises';
 import { pipeline } from 'stream/promises';
 
 @Injectable()
@@ -131,11 +132,13 @@ export class StorageService {
     localPath: string,
     contentType: string,
   ): Promise<void> {
+    const stat = await fsp.stat(localPath);
     const command = new PutObjectCommand({
       Bucket: this.config.bucketName,
       Key: key,
       Body: fs.createReadStream(localPath),
       ContentType: contentType,
+      ContentLength: stat.size,
     });
     await this.s3Client.send(command);
   }

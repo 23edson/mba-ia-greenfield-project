@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsNumber, IsString, ValidateNested } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsNumber, IsString, ValidateNested } from 'class-validator';
 
 export class PartDto {
   @IsNumber()
@@ -11,6 +11,7 @@ export class PartDto {
 
 export class CompleteUploadDto {
   @IsArray()
+  @ArrayNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => PartDto)
   parts: PartDto[];

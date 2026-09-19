@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Video, VideoStatus } from '../../videos/entities/video.entity';
 import { StorageService } from '../../storage/storage.service';
-import * as ffmpeg from 'fluent-ffmpeg';
+import ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -163,7 +163,7 @@ export class VideoProcessingProcessor extends WorkerHost {
     return new Promise((resolve, reject) => {
       const timestamp = duration > 10 ? '10%' : '00:00:01';
 
-      (ffmpeg as any)(inputPath)
+      ffmpeg(inputPath)
         .screenshots({
           timestamps: [timestamp],
           filename: path.basename(outputPath),
@@ -181,7 +181,7 @@ export class VideoProcessingProcessor extends WorkerHost {
     outputPath: string,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      (ffmpeg as any)(inputPath)
+      ffmpeg(inputPath)
         .outputOptions(['-c copy', '-movflags +faststart'])
         .save(outputPath)
         .on('end', () => resolve())
