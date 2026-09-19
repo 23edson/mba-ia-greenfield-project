@@ -132,13 +132,27 @@ export class StorageService {
     localPath: string,
     contentType: string,
   ): Promise<void> {
-    const fileBuffer = await fsp.readFile(localPath);
-    const command = new PutObjectCommand({
-      Bucket: this.config.bucketName,
-      Key: key,
-      Body: fileBuffer,
-      ContentType: contentType,
+    const stat = await fsp.stat(localPath);
+    const fileStream = fs.createReadStream(localPath);
+
+    return new Promise<void>((resolve, reject) => {
+      // Captura erros da leitura do arquivo (durante a stream) e rejeita a Promise explicitamente
+      fileStream.on('error', (err) => {
+        reject(err);
+      });
+
+      const command = new PutObjectCommand({
+        Bucket: this.config.bucketName,
+        Key: key,
+        Body: fileStream,
+        ContentType: contentType,
+        ContentLength: stat.size,
+      });
+
+      this.s3Client
+        .send(command)
+        .then(() => resolve())
+        .catch((err) => reject(err));
     });
-    await this.s3Client.send(command);
   }
 }

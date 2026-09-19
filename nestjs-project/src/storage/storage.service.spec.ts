@@ -154,20 +154,68 @@ describe('StorageService', () => {
   });
 
   describe('uploadFile', () => {
-    let readFileSpy: jest.SpyInstance;
+    let statSpy: jest.SpyInstance;
+    let createReadStreamSpy: jest.SpyInstance;
+    let mockStream: any;
+
     beforeEach(() => {
-      readFileSpy = jest
-        .spyOn(fs.promises, 'readFile')
-        .mockResolvedValue(Buffer.from('test') as any);
-    });
-    afterEach(() => {
-      readFileSpy.mockRestore();
+      statSpy = jest.spyOn(fs.promises, 'stat').mockResolvedValue({ size: 100 } as any);
+      
+      // Criamos um mock de stream que suporta handlers de eventos reais (como 'on')
+      mockStream = {
+        handlers: {},
+        on(event: string, callback: any) {
+          this.handlers[event] = callback;
+        },
+        emit(event: string, ...args: any[]) {
+          if (this.handlers[event]) {
+            this.handlers[event](...args);
+          }
+        },
+      };
+
+      createReadStreamSpy = jest.spyOn(fs, 'createReadStream').mockReturnValue(mockStream);
     });
 
-    it('should call PutObjectCommand', async () => {
-      (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({} as any);
-      await service.uploadFile('test-key', '/tmp/file.mp4', 'video/mp4');
+    afterEach(() => {
+      statSpy.mockRestore();
+      createReadStreamSpy.mockRestore();
+    });
+
+    it('should resolve when s3Client.send resolves without stream errors', async () => {
+      (s3ClientMock.send as jest.Mock).mockResolvedValueOnce({});
+      await expect(
+        service.uploadFile('test-key', '/tmp/file.mp4', 'video/mp4')
+      ).resolves.toBeUndefined();
+      
       expect(s3ClientMock.send).toHaveBeenCalled();
+    });
+
+    it('should reject when fileStream emits an error during transmission', async () => {
+      // Mock s3Client.send para retornar uma promise que nunca resolve (pendente),
+      // simulando um upload em progresso lento.
+      (s3ClientMock.send as jest.Mock).mockImplementationOnce(() => new Promise(() => {}));
+
+      const uploadPromise = service.uploadFile('test-key', '/tmp/file.mp4', 'video/mp4');
+
+      // Aguarda a promise do `fsp.stat` resolver para que a stream seja criada e o listener
+      // .on('error') seja devidamente atachado antes de emitirmos o erro.
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      // Simulamos um erro assíncrono emitido pelo stream (ex: erro de leitura no disco)
+      const streamError = new Error('Disk read error during stream');
+      mockStream.emit('error', streamError);
+
+      await expect(uploadPromise).rejects.toThrow('Disk read error during stream');
+    });
+
+    it('should reject when s3Client.send rejects', async () => {
+      const s3Error = new Error('S3 Upload Failed');
+      (s3ClientMock.send as jest.Mock).mockRejectedValueOnce(s3Error);
+
+      await expect(
+        service.uploadFile('test-key', '/tmp/file.mp4', 'video/mp4')
+      ).rejects.toThrow('S3 Upload Failed');
     });
   });
 });
