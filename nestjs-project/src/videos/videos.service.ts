@@ -175,7 +175,9 @@ export class VideosService {
 
     let thumbnailUrl: string | null = null;
     if (video.thumbnailKey) {
-      thumbnailUrl = await this.storageService.getPresignedDownloadUrl(video.thumbnailKey);
+      thumbnailUrl = await this.storageService.getPresignedDownloadUrl(
+        video.thumbnailKey,
+      );
     }
 
     return {
@@ -196,15 +198,21 @@ export class VideosService {
   async getStreamUrl(publicId: string): Promise<string> {
     const video = await this.videosRepository.findOne({ where: { publicId } });
     if (!video) throw new VideoNotFoundException();
-    if (video.status !== 'ready') throw new VideoNotReadyException();
-    return this.storageService.getPresignedDownloadUrl(video.storageKey, { expiresIn: 7200 });
+    if (video.status !== VideoStatus.READY) throw new VideoNotReadyException();
+    return this.storageService.getPresignedDownloadUrl(video.storageKey, {
+      expiresIn: 7200,
+    });
   }
 
   async getDownloadUrl(publicId: string): Promise<string> {
     const video = await this.videosRepository.findOne({ where: { publicId } });
     if (!video) throw new VideoNotFoundException();
-    if (video.status !== 'ready') throw new VideoNotReadyException();
-    const encodedTitle = encodeURIComponent(video.title.replace(/[^a-zA-Z0-9_-]/g, '_'));
-    return this.storageService.getPresignedDownloadUrl(video.storageKey, { responseContentDisposition: `attachment; filename="${encodedTitle}.mp4"` });
+    if (video.status !== VideoStatus.READY) throw new VideoNotReadyException();
+    const encodedTitle = encodeURIComponent(
+      video.title.replace(/[^a-zA-Z0-9_-]/g, '_'),
+    );
+    return this.storageService.getPresignedDownloadUrl(video.storageKey, {
+      responseContentDisposition: `attachment; filename="${encodedTitle}.mp4"`,
+    });
   }
 }

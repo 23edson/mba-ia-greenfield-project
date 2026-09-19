@@ -41,7 +41,9 @@ describe('VideosService (integration)', () => {
       createMultipartUpload: jest.fn().mockResolvedValue('test-upload-id'),
       getPresignedPartUrls: jest.fn().mockResolvedValue(['url1']),
       completeMultipartUpload: jest.fn().mockResolvedValue(undefined),
-      getPresignedDownloadUrl: jest.fn().mockResolvedValue('https://s3.test/test/integration.mp4'),
+      getPresignedDownloadUrl: jest
+        .fn()
+        .mockResolvedValue('https://s3.test/test/integration.mp4'),
     };
 
     videoProcessingQueue = {
@@ -219,7 +221,7 @@ describe('VideosService (integration)', () => {
       const video = videoRepository.create({
         title: 'Integration Test Query',
         channelId: channel.id,
-        status: 'ready',
+        status: VideoStatus.READY,
         storageKey: 'test/integration.mp4',
         publicId: 'itest-query',
       });
