@@ -1,7 +1,7 @@
 # phase-03-videos — Progress
 
 **Status:** in_progress
-**SIs:** 4/8 completed
+**SIs:** 7/8 completed
 
 ### SI-03.1 — Dependencies, Configuration Namespaces e MinIO/Redis Infrastructure
 - **Status:** completed
@@ -38,9 +38,9 @@
 - **Observations:** Implemented `createDraft` (generating publicId with `crypto` fallback instead of `nanoid` ESM module to avoid Jest issues) and `completeUpload` (triggering multipart completion and pushing to BullMQ). Added `uploadId` to `CompleteUploadDto` so the client can pass it back. Created appropriate domain exceptions.
 
 ### SI-03.7 — Video Query Service (Public Lookup, Streaming & Download URL Generation)
-- **Status:** pending
-- **Tests:** pending
-- **Observations:** pending
+- **Status:** completed
+- **Tests:** 5 passing (unit and integration)
+- **Observations:** Implemented `findByPublicId`, `getStreamUrl` and `getDownloadUrl` directly in `VideosService` returning presigned URLs from S3. Added validation for `VideoNotReadyException` (HTTP 409). Handled `response-content-disposition` in S3 options directly to prompt browser downloads on the download endpoint. Integrated tests into `videos.service.integration-spec.ts`.
 
 ### SI-03.8 — Videos Controller (API Endpoints & Routing)
 - **Status:** pending
