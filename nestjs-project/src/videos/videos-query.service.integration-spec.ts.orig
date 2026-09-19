@@ -1,0 +1,61 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+import { VideosService } from './videos.service';
+import { Video } from './entities/video.entity';
+import { Channel } from '../channels/entities/channel.entity';
+import { StorageService } from '../storage/storage.service';
+import storageConfig from '../config/storage.config';
+import { BullModule } from '@nestjs/bullmq';
+import queueConfig from '../config/queue.config';
+import databaseConfig from '../config/database.config';
+import { VideoNotReadyException } from '../common/exceptions/domain.exception';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+describe('VideosService (Query Integration)', () => {
+  let service: VideosService;
+  let repo: Repository<Video>;
+
+  beforeAll(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          envFilePath: '.env.test',
+          load: [databaseConfig, storageConfig, queueConfig],
+        }),
+        TypeOrmModule.forRootAsync({
+          useFactory: databaseConfig,
+        }),
+        TypeOrmModule.forFeature([Video, Channel]),
+        BullModule.forRootAsync({
+          useFactory: queueConfig,
+        }),
+        BullModule.registerQueue({
+          name: 'video-processing',
+        }),
+      ],
+      providers: [VideosService, StorageService],
+    }).compile();
+
+    service = module.get<VideosService>(VideosService);
+    repo = module.get<Repository<Video>>(getRepositoryToken(Video));
+  });
+
+  it('should retrieve a video and its stream URL', async () => {
+    const video = repo.create({
+      title: 'Query Test',
+      channelId: '00000000-0000-0000-0000-000000000000',
+      status: 'ready',
+      storageKey: 'query-test.mp4',
+      publicId: 'qt1234',
+    });
+    await repo.save(video);
+
+    const streamUrl = await service.getStreamUrl('qt1234');
+    expect(streamUrl).toContain('http');
+    
+    await repo.remove(video);
+  });
+});

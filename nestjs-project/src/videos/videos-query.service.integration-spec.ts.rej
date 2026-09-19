@@ -1,0 +1,14 @@
+--- videos-query.service.integration-spec.ts
++++ videos-query.service.integration-spec.ts
+@@ -23,8 +24,9 @@
+           load: [databaseConfig, storageConfig, queueConfig],
+         }),
+         TypeOrmModule.forRootAsync({
+-          useFactory: databaseConfig,
++          inject: [ConfigService],
++          useFactory: (config: ConfigService) => config.get('database')!,
+         }),
+         TypeOrmModule.forFeature([Video, Channel]),
+         BullModule.forRootAsync({
+-          useFactory: queueConfig,
++          inject: [ConfigService],

@@ -41,6 +41,7 @@ describe('VideosService (integration)', () => {
       createMultipartUpload: jest.fn().mockResolvedValue('test-upload-id'),
       getPresignedPartUrls: jest.fn().mockResolvedValue(['url1']),
       completeMultipartUpload: jest.fn().mockResolvedValue(undefined),
+      getPresignedDownloadUrl: jest.fn().mockResolvedValue('https://s3.test/test/integration.mp4'),
     };
 
     videoProcessingQueue = {
@@ -208,6 +209,27 @@ describe('VideosService (integration)', () => {
           parts: [],
         }),
       ).rejects.toThrow(VideoNotInDraftException);
+    });
+  });
+
+  describe('Query Methods', () => {
+    it('should get stream URL and download URL', async () => {
+      const { channel } = await createChannelForUser();
+
+      const video = videoRepository.create({
+        title: 'Integration Test Query',
+        channelId: channel.id,
+        status: 'ready',
+        storageKey: 'test/integration.mp4',
+        publicId: 'itest-query',
+      });
+      await videoRepository.save(video);
+
+      const streamUrl = await service.getStreamUrl('itest-query');
+      expect(streamUrl).toContain('test/integration.mp4');
+
+      const dlUrl = await service.getDownloadUrl('itest-query');
+      expect(dlUrl).toContain('test/integration.mp4');
     });
   });
 });

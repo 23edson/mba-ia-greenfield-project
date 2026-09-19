@@ -14,6 +14,7 @@ import {
   ForbiddenException,
   VideoNotFoundException,
   VideoNotInDraftException,
+  VideoNotReadyException,
 } from '../common/exceptions/domain.exception';
 
 const UNAMBIGUOUS_ALPHABET =
@@ -161,5 +162,49 @@ export class VideosService {
       publicId: updatedVideo!.publicId,
       status: updatedVideo!.status,
     };
+  }
+
+  async findByPublicId(publicId: string) {
+    const video = await this.videosRepository.findOne({
+      where: { publicId },
+    });
+
+    if (!video) {
+      throw new VideoNotFoundException();
+    }
+
+    let thumbnailUrl: string | null = null;
+    if (video.thumbnailKey) {
+      thumbnailUrl = await this.storageService.getPresignedDownloadUrl(video.thumbnailKey);
+    }
+
+    return {
+      id: video.id,
+      publicId: video.publicId,
+      title: video.title,
+      description: video.description,
+      status: video.status,
+      duration: video.duration,
+      width: video.width,
+      height: video.height,
+      thumbnailUrl,
+      channelId: video.channelId,
+      createdAt: video.createdAt.toISOString(),
+    };
+  }
+
+  async getStreamUrl(publicId: string): Promise<string> {
+    const video = await this.videosRepository.findOne({ where: { publicId } });
+    if (!video) throw new VideoNotFoundException();
+    if (video.status !== 'ready') throw new VideoNotReadyException();
+    return this.storageService.getPresignedDownloadUrl(video.storageKey, { expiresIn: 7200 });
+  }
+
+  async getDownloadUrl(publicId: string): Promise<string> {
+    const video = await this.videosRepository.findOne({ where: { publicId } });
+    if (!video) throw new VideoNotFoundException();
+    if (video.status !== 'ready') throw new VideoNotReadyException();
+    const encodedTitle = encodeURIComponent(video.title.replace(/[^a-zA-Z0-9_-]/g, '_'));
+    return this.storageService.getPresignedDownloadUrl(video.storageKey, { responseContentDisposition: `attachment; filename="${encodedTitle}.mp4"` });
   }
 }
