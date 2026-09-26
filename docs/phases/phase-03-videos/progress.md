@@ -1,7 +1,7 @@
 # phase-03-videos — Progress
 
-**Status:** in_progress
-**SIs:** 7/8 completed
+**Status:** completed
+**SIs:** 8/8 completed
 
 ### SI-03.1 — Dependencies, Configuration Namespaces e MinIO/Redis Infrastructure
 - **Status:** completed
@@ -35,7 +35,11 @@
 ### SI-03.6 — Videos Service (Upload, Multipart Initiation & Completion)
 - **Status:** completed
 - **Tests:** 12/12 passing (unit and integration tests)
-- **Observations:** Implemented `createDraft` (generating publicId with `crypto` fallback instead of `nanoid` ESM module to avoid Jest issues) and `completeUpload` (triggering multipart completion and pushing to BullMQ). Added `uploadId` to `CompleteUploadDto` so the client can pass it back. Created appropriate domain exceptions.
+- **Observations:** Implemented `createDraft` e `completeUpload` (triggering multipart completion and pushing to BullMQ). Created appropriate domain exceptions.
+  - publicId gerado via nanoid@3 (customAlphabet, alfabeto sem caracteres ambíguos, conforme TD-05).
+  - uploadId persistido na entidade Video (migration AddUploadIdToVideos) e recuperado do banco no completeUpload, não mais enviado pelo cliente.
+  
+  *Nota: Essa foi uma correção feita durante a revisão, antes do fechamento do SI, para manter a rastreabilidade honesta do processo.*
 
 ### SI-03.7 — Video Query Service (Public Lookup, Streaming & Download URL Generation)
 - **Status:** completed
